@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>１０ドロップⅡ</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #FFE135 0%, #FF6B6B 50%, #4ECDC4 100%);
+            height: 100vh;
+            overflow: hidden;
+            color: #2C3E50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #FFE135 0%, #FF6B6B 50%, #4ECDC4 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .start-screen h1 {
+            font-size: 48px;
+            color: #2C3E50;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            animation: titleBounce 2s ease-in-out infinite;
+        }
+        
+        .start-screen p {
+            font-size: 18px;
+            color: #2C3E50;
+            text-align: center;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+        
+        .start-btn {
+            background: linear-gradient(45deg, #4ECDC4, #45B7B8);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            margin: 20px;
+        }
+        
+        .start-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        @keyframes titleBounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .game-container {
+            display: flex;
+            height: calc(100vh - 20px);
+            max-width: 1200px;
+            width: 100%;
+            gap: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+            margin: 0 auto;
+        }
+        
+        .left-panel, .center-panel, .right-panel {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .left-panel {
+            flex: 0 0 280px;
+        }
+        
+        .center-panel {
+            flex: 0 0 380px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .right-panel {
+            flex: 0 0 280px;
+            gap: 10px;
+        }
+        
+        .game-board {
+            background: rgba(255, 255, 255, 0.95);
+            border: 4px solid #FF6B6B;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        canvas {
+            display: block;
+            background: #F8F9FA;
+            border-radius: 15px;
+            border: 3px solid #4ECDC4;
+        }
+        
+        .info-panel, .next-piece-panel, .ranking-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
+        }
+        
+        .info-panel {
+            border: 4px solid #4ECDC4;
+            flex: 1;
+        }
+        
+        .next-piece-panel {
+            border: 4px solid #FFE135;
+            flex: 0 0 200px;
+            text-align: center;
+        }
+        
+        .ranking-panel {
+            border: 4px solid #FF6B6B;
+            flex: 1;
+        }
+        
+        .info-panel h2, .next-piece-panel h3, .ranking-panel h3 {
+            margin-top: 0;
+            color: #FF6B6B;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .info-panel h2 {
+            font-size: 24px;
+        }
+        
+        .next-piece-panel h3, .ranking-panel h3 {
+            font-size: 18px;
+        }
+        
+        .player-id {
+            background: linear-gradient(45deg, #FFE135, #FF6B6B);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .score, .level, .lines {
+            font-size: 18px;
+            margin: 12px 0;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            font-weight: bold;
+            color: #2C3E50;
+        }
+        
+        #nextPieceCanvas {
+            background: #F8F9FA;
+            border: 3px solid #4ECDC4;
+            border-radius: 15px;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            font-size: 13px;
+            line-height: 1.6;
+            background: linear-gradient(45deg, #E8F5E8, #E8F8FF);
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #4ECDC4;
+        }
+        
+        .score-entry {
+            background: linear-gradient(45deg, #FFE135, #4ECDC4);
+            margin: 4px 0;
+            padding: 6px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        
+        .score-rank {
+            font-weight: bold;
+            color: #FFE135;
+            width: 20px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .score-details {
+            flex: 1;
+            margin-left: 8px;
+        }
+        
+        .score-date {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .game-over {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.98);
+            color: #2C3E50;
+            padding: 40px;
+            border-radius: 25px;
+            text-align: center;
+            border: 5px solid #FF6B6B;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .restart-btn, .clear-scores-btn, .pause-btn {
+            background: linear-gradient(45deg, #4ECDC4, #45B7B8);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease;
+            width: 100%;
+        }
+        
+        .clear-scores-btn {
+            background: linear-gradient(45deg, #FF6B6B, #FF5252);
+            font-size: 12px;
+            padding: 8px 15px;
+        }
+        
+        .pause-btn {
+            background: linear-gradient(45deg, #FF6B6B, #FF5252);
+            margin-top: 15px;
+        }
+        
+        .restart-btn:hover, .clear-scores-btn:hover, .pause-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .animation-overlay {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 360px;
+            height: 600px;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .chain-text {
+            position: absolute;
+            font-size: 28px;
+            font-weight: bold;
+            color: #FF6B6B;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            animation: chainPop 1s ease-out forwards;
+            pointer-events: none;
+        }
+        
+        .level-up-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 36px;
+            font-weight: bold;
+            color: #4ECDC4;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3);
+            animation: levelUpPulse 2s ease-out forwards;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .new-high-score {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 32px;
+            font-weight: bold;
+            color: #FFE135;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3);
+            animation: newHighScore 3s ease-out forwards;
+            pointer-events: none;
+        }
+        
+        @keyframes chainPop {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.3) rotate(180deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes levelUpPulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 1;
+            }
+            30% {
+                transform: translate(-50%, -50%) scale(1.4);
+                opacity: 1;
+            }
+            60% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes newHighScore {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 1;
+            }
+            20% {
+                transform: translate(-50%, -50%) scale(1.3);
+                opacity: 1;
+            }
+            40% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes particleExplode {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+        
+        .score-glow {
+            animation: scoreGlow 0.5s ease-out;
+        }
+        
+        @keyframes scoreGlow {
+            0% {
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+                color: #2C3E50;
+            }
+            50% {
+                text-shadow: 0 0 20px #FFE135, 1px 1px 2px rgba(0, 0, 0, 0.1);
+                color: #FF6B6B;
+            }
+            100% {
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+                color: #2C3E50;
+            }
+        }
+        
+        /* スマホ向けの情報表示エリア */
+        .mobile-score-info {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: linear-gradient(45deg, #E8F5E8, #E8F8FF);
+            border-radius: 15px;
+            border: 2px solid #4ECDC4;
+        }
+        
+        .mobile-score-info .score, 
+        .mobile-score-info .level, 
+        .mobile-score-info .lines {
+            font-size: 16px;
+            margin: 8px 0;
+        }
+        
+        /* モバイル向けレスポンシブ対応 */
+        @media (max-width: 768px) {
+            body {
+                overflow: auto;
+            }
+            
+            .game-container {
+                flex-direction: column;
+                height: auto;
+                min-height: 100vh;
+                padding: 5px;
+                gap: 10px;
+            }
+            
+            .left-panel {
+                display: none; /* スマホでは左パネル（操作方法とランキング）を非表示 */
+            }
+            
+            .center-panel {
+                flex: 1;
+                order: 1;
+            }
+            
+            .right-panel {
+                flex: 0 0 auto;
+                order: 2;
+                height: auto;
+            }
+            
+            .ranking-panel {
+                display: none; /* スマホではランキングパネルを非表示 */
+            }
+            
+            .next-piece-panel {
+                flex: 0 0 auto;
+                height: auto;
+            }
+            
+            .mobile-score-info {
+                display: block; /* スマホでスコア情報を表示 */
+            }
+            
+            .info-panel, .next-piece-panel {
+                padding: 15px;
+            }
+            
+            .start-screen h1 {
+                font-size: 28px;
+            }
+            
+            .start-screen p {
+                font-size: 14px;
+                padding: 0 20px;
+            }
+            
+            .start-btn {
+                font-size: 18px;
+                padding: 15px 30px;
+            }
+            
+            .game-board {
+                padding: 10px;
+            }
+            
+            canvas {
+                max-width: 100%;
+                height: auto;
+            }
+            
+            #nextPieceCanvas {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .animation-overlay {
+                width: 100%;
+                height: 100%;
+                top: 10px;
+                left: 10px;
+            }
+            
+            .game-over {
+                padding: 20px;
+                margin: 10px;
+                width: calc(100% - 40px);
+                max-width: 400px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .start-screen h1 {
+                font-size: 24px;
+            }
+            
+            .start-screen p {
+                font-size: 12px;
+            }
+            
+            .start-btn {
+                font-size: 16px;
+                padding: 12px 24px;
+            }
+            
+            canvas {
+                width: 300px;
+                height: 500px;
+            }
+            
+            .animation-overlay {
+                width: 300px;
+                height: 500px;
+            }
+            
+            #nextPieceCanvas {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="startScreen" class="start-screen">
+        <h1>🎮 １０ドロップⅡ 🎮</h1>
+        <p>
+            🎯 隣接する数字の合計が10になると消える！<br>
+            🌟 連鎖でボーナス点を獲得しよう！<br>
+            🏆 高得点を目指してがんばって！
+        </p>
+        <p>
+            <strong>🎮 操作方法:</strong><br>
+            PC: ← / Z : 左移動　　→ / C : 右移動<br>
+            PC: ↓ / X : 高速落下　　↑ / Space / Enter : 回転<br>
+            スマホ: 左右スワイプで移動、下フリックで高速落下、タップで回転
+        </p>
+        <button class="start-btn" onclick="startGame()">🚀 ゲームスタート 🚀</button>
+    </div>
+
+    <div id="gameContainer" class="game-container" style="display: none;">
+        <!-- 左パネル：スコア・ルール（スマホでは非表示） -->
+        <div class="left-panel">
+            <div class="info-panel">
+                <h2>１０ドロップⅡ</h2>
+                <div class="player-id" id="playerId">プレイヤーID: 読み込み中...</div>
+                <div class="score">スコア: <span id="score">0</span></div>
+                <div class="level">レベル: <span id="level">1</span></div>
+                <div class="lines">消去行: <span id="lines">0</span></div>
+                
+                <button class="pause-btn" id="pauseBtn" onclick="togglePause()">⏸️ ポーズ</button>
+                
+                <div class="controls">
+                    <strong>🎮 操作方法:</strong><br>
+                    PC: ← / Z : 左移動<br>
+                    PC: → / C : 右移動<br>
+                    PC: ↓ / X : 高速落下<br>
+                    PC: ↑ / Space / Enter : 回転<br>
+                    PC: P : ポーズ<br>
+                    <br>
+                    <strong>📱 スマホ操作:</strong><br>
+                    左右スワイプ: 移動<br>
+                    下フリック: 高速落下<br>
+                    タップ: 回転<br>
+                    <br>
+                    <strong>🎯 ルール:</strong><br>
+                    隣接する数字の合計が10になると消える！<br>
+                    連鎖でボーナス点獲得！<br>
+                    <br>
+                    <strong>🌟 得点システム:</strong><br>
+                    基本点: 消去ブロック数 × 100<br>
+                    チェーンボーナス: (チェーン数-1) × 200<br>
+                    レベルアップ: 消去行数 ÷ 2 × 10
+                </div>
+            </div>
+        </div>
+        
+        <!-- 中央パネル：ゲーム画面 -->
+        <div class="center-panel">
+            <div class="game-board">
+                <canvas id="gameCanvas" width="360" height="600"></canvas>
+                <div class="animation-overlay" id="animationOverlay"></div>
+            </div>
+        </div>
+        
+        <!-- 右パネル：次のブロック・ランキング -->
+        <div class="right-panel">
+            <div class="next-piece-panel">
+                <h3>🎯 次のブロック</h3>
+                <canvas id="nextPieceCanvas" width="150" height="150"></canvas>
+                
+                <!-- スマホ用スコア情報 -->
+                <div class="mobile-score-info">
+                    <div class="player-id" id="playerIdMobile">プレイヤーID: 読み込み中...</div>
+                    <div class="score">スコア: <span id="scoreMobile">0</span></div>
+                    <div class="level">レベル: <span id="levelMobile">1</span></div>
+                    <div class="lines">消去行: <span id="linesMobile">0</span></div>
+                    <button class="pause-btn" id="pauseBtnMobile" onclick="togglePause()">⏸️ ポーズ</button>
+                </div>
+            </div>
+            
+            <div class="ranking-panel">
+                <h3>🏆 ベスト10</h3>
+                <div id="highScoresList"></div>
+                <button class="clear-scores-btn" onclick="clearHighScores()">記録をクリア</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="gameOver" class="game-over">
+        <h2>🎮 ゲームオーバー</h2>
+        <p>最終スコア: <span id="finalScore">0</span></p>
+        <p id="highScoreMessage"></p>
+        <button class="restart-btn" onclick="restartGame()">もう一度プレイ</button>
+        <button class="restart-btn" onclick="backToStart()">スタート画面に戻る</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const nextPieceCanvas = document.getElementById('nextPieceCanvas');
+        const nextCtx = nextPieceCanvas.getContext('2d');
+        const animationOverlay = document.getElementById('animationOverlay');
+        const BLOCK_SIZE = 30;
+        const BOARD_WIDTH = 12;
+        const BOARD_HEIGHT = 20;
+        const NEXT_BLOCK_SIZE = 25;
+        
+        let gameState = {
+            board: [],
+            currentPiece: null,
+            nextPiece: null,
+            score: 0,
+            level: 1,
+            lines: 0,
+            gameOver: false,
+            dropTime: 0,
+            dropInterval: 1000,
+            chainCount: 0,
+            animatingBlocks: [],
+            paused: false,
+            gameStarted: false
+        };
+        
+        let gameLoopId = null;
+        
+        // タッチ操作用の変数
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+        const minSwipeDistance = 50;
+        
+        // 各文字のブロック配置パターン（左上を(0,0)とする座標系）
+        const blockPatterns = {
+            '1': [
+                [0, 0], [0, 1], [0, 2], [0, 3], [0, 4]
+            ],
+            '2': [
+                [0, 0], [1, 0],
+                [1, 1], [1, 2],
+                [0, 2],
+                [0, 3],
+                [0, 4], [1, 4]
+            ],
+            '3': [
+                [0, 0], [1, 0],
+                [1, 1], [1, 2],
+                [0, 2],
+                [1, 3], [1, 4],
+                [0, 4], [1, 4]
+            ],
+            '5': [
+                [0, 0], [1, 0],
+                [0, 1], [0, 2],
+                [0, 2], [1, 2],
+                [1, 3], [1, 4],
+                [0, 4], [1, 4]
+            ],
+            '7': [
+                [0, 0], [1, 0], [2, 0],
+                [2, 1], [2, 2], [2, 3]
+            ],
+            '「': [
+                [0, 0], [1, 0],
+                [0, 1]
+            ],
+            '」': [
+                [1, 0],
+                [0, 1], [1, 1]
+            ]
+        };
+        
+        // ブロックパターンから形状を生成
+        function createShapeFromPattern(pattern) {
+            if (!pattern || pattern.length === 0) return [[1]];
+            
+            // パターンの最大座標を取得
+            const maxX = Math.max(...pattern.map(p => p[0]));
+            const maxY = Math.max(...pattern.map(p => p[1]));
+            
+            // 2次元配列を初期化
+            const shape = Array(maxY + 1).fill().map(() => Array(maxX + 1).fill(0));
+            
+            // パターンに基づいてブロックを配置
+            pattern.forEach(([x, y]) => {
+                shape[y][x] = 1;
+            });
+            
+            return shape;
+        }
+        
+        // ピース定義（新しいブロックパターンを使用）
+        const PIECES = [
+            // 1の形
+            {
+                shape: createShapeFromPattern(blockPatterns['1']),
+                numbers: () => Array(blockPatterns['1'].length).fill().map(() => Math.floor(Math.random() * 9) + 1)
+            },
+            // 2の形
+            {
+                shape: createShapeFromPattern(blockPatterns['2']),
+                numbers: () => Array(blockPatterns['2'].length).fill().map(() => Math.floor(Math.random() * 9) + 1)
+            },
+            // 3の形
+            {
+                shape: createShapeFromPattern(blockPatterns['3']),
+                numbers: () => Array(blockPatterns['3'].length).fill().map(() => Math.floor(Math.random() * 9) + 1)
+            },
+            // 5の形
+            {
+                shape: createShapeFromPattern(blockPatterns['5']),
+                numbers: () => Array(blockPatterns['5'].length).fill().map(() => Math.floor(Math.random() * 9) + 1)
+            },
+            // 7の形
+            {
+                shape: createShapeFromPattern(blockPatterns['7']),
+                numbers: () => Array(blockPatterns['7'].length).fill().map(() => Math.floor(Math.random() * 9) + 1)
+            },
+            // 「の形
+            {
+                shape: createShapeFromPattern(blockPatterns['「']),
+                numbers: () => Array(blockPatterns['「'].length).fill().map(() => Math.floor(Math.random() * 9) + 1)
+            },
+            // 」の形
+            {
+                shape: createShapeFromPattern(blockPatterns['」']),
+                numbers: () => Array(blockPatterns['」'].length).fill().map(() => Math.floor(Math.random() * 9) + 1)
+            }
+        ];
+        
+        // タッチイベントの設定
+        function setupTouchEvents() {
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+        }
+        
+        function handleTouchStart(e) {
+            e.preventDefault();
+            if (!gameState.gameStarted || gameState.gameOver || gameState.paused || !gameState.currentPiece) return;
+            
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }
+        
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!gameState.gameStarted || gameState.gameOver || gameState.paused || !gameState.currentPiece) return;
+            
+            touchEndX = e.touches[0].clientX;
+            touchEndY = e.touches[0].clientY;
+        }
+        
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            if (!gameState.gameStarted || gameState.gameOver || gameState.paused || !gameState.currentPiece) return;
+            
+            const diffX = touchEndX - touchStartX;
+            const diffY = touchEndY - touchStartY;
+            
+            // スワイプ距離が最小距離以上かチェック
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                // 横方向のスワイプ
+                if (Math.abs(diffX) > minSwipeDistance) {
+                    if (diffX > 0) {
+                        // 右スワイプ
+                        if (!isCollision(gameState.currentPiece, 1, 0)) {
+                            gameState.currentPiece.x++;
+                        }
+                    } else {
+                        // 左スワイプ
+                        if (!isCollision(gameState.currentPiece, -1, 0)) {
+                            gameState.currentPiece.x--;
+                        }
+                    }
+                } else {
+                    // タップ（回転）
+                    const rotated = rotatePiece(gameState.currentPiece);
+                    if (!isCollision(rotated)) {
+                        gameState.currentPiece = rotated;
+                    }
+                }
+            } else {
+                // 縦方向のスワイプ
+                if (Math.abs(diffY) > minSwipeDistance) {
+                    if (diffY > 0) {
+                        // 下フリック（高速落下）
+                        while (!isCollision(gameState.currentPiece, 0, 1)) {
+                            gameState.currentPiece.y++;
+                        }
+                    }
+                } else {
+                    // タップ（回転）
+                    const rotated = rotatePiece(gameState.currentPiece);
+                    if (!isCollision(rotated)) {
+                        gameState.currentPiece = rotated;
+                    }
+                }
+            }
+        }
+        
+        // ゲーム開始
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'flex';
+            gameState.gameStarted = true;
+            initGame();
+            setupTouchEvents(); // タッチイベントを設定
+            if (gameLoopId) {
+                cancelAnimationFrame(gameLoopId);
+            }
+            gameLoop();
+        }
+        
+        // スタート画面に戻る
+        function backToStart() {
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'flex';
+            gameState.gameStarted = false;
+            gameState.paused = false;
+            if (gameLoopId) {
+                cancelAnimationFrame(gameLoopId);
+            }
+        }
+        
+        // ポーズ機能
+        function togglePause() {
+            if (!gameState.gameStarted || gameState.gameOver) return;
+            
+            gameState.paused = !gameState.paused;
+            const pauseBtn = document.getElementById('pauseBtn');
+            const pauseBtnMobile = document.getElementById('pauseBtnMobile');
+            
+            if (gameState.paused) {
+                pauseBtn.textContent = '▶️ 再開';
+                pauseBtnMobile.textContent = '▶️ 再開';
+            } else {
+                pauseBtn.textContent = '⏸️ ポーズ';
+                pauseBtnMobile.textContent = '⏸️ ポーズ';
+            }
+        }
+        
+        // プレイヤーID管理
+        function generatePlayerId() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hour = String(now.getHours()).padStart(2, '0');
+            const minute = String(now.getMinutes()).padStart(2, '0');
+            const second = String(now.getSeconds()).padStart(2, '0');
+            
+            return `${year}${month}${day}${hour}${minute}${second}`;
+        }
+        
+        function getOrCreatePlayerId() {
+            let playerId = localStorage.getItem('tenDropPlayerId');
+            if (!playerId) {
+                playerId = generatePlayerId();
+                localStorage.setItem('tenDropPlayerId', playerId);
+            }
+            return playerId;
+        }
+        
+        function displayPlayerId() {
+            const playerId = getOrCreatePlayerId();
+            document.getElementById('playerId').textContent = `プレイヤーID: ${playerId}`;
+            document.getElementById('playerIdMobile').textContent = `プレイヤーID: ${playerId}`;
+        }
+        
+        // ハイスコア管理
+        function loadHighScores() {
+            const scores = localStorage.getItem('tenDropHighScores');
+            return scores ? JSON.parse(scores) : [];
+        }
+        
+        function saveHighScore(score, level) {
+            const highScores = loadHighScores();
+            const playerId = getOrCreatePlayerId();
+            const newScore = {
+                score: score,
+                level: level,
+                playerId: playerId,
+                date: new Date().toLocaleDateString('ja-JP', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })
+            };
+            
+            highScores.push(newScore);
+            highScores.sort((a, b) => b.score - a.score);
+            
+            // ベスト10のみ保存
+            const top10 = highScores.slice(0, 10);
+            localStorage.setItem('tenDropHighScores', JSON.stringify(top10));
+            
+            // 新記録の順位を返す
+            const rank = highScores.findIndex(score => score.score === newScore.score && score.playerId === newScore.playerId) + 1;
+            return rank <= 10 ? rank : null;
+        }
+        
+        function displayHighScores() {
+            const highScores = loadHighScores();
+            const highScoresList = document.getElementById('highScoresList');
+            
+            if (highScores.length === 0) {
+                highScoresList.innerHTML = '<div style="color: #888; text-align: center; padding: 10px; font-size: 12px;">まだ記録がありません</div>';
+                return;
+            }
+            
+            highScoresList.innerHTML = highScores.map((score, index) => `
+                <div class="score-entry">
+                    <span class="score-rank">${index + 1}</span>
+                    <div class="score-details">
+                        <div>${score.score.toLocaleString()}点 (Lv.${score.level})</div>
+                        <div class="score-date">ID: ${score.playerId}</div>
+                        <div class="score-date">${score.date}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function clearHighScores() {
+            if (confirm('ハイスコア記録をすべて削除しますか？')) {
+                localStorage.removeItem('tenDropHighScores');
+                displayHighScores();
+            }
+        }
+        
+        function checkNewHighScore() {
+            const rank = saveHighScore(gameState.score, gameState.level);
+            
+            if (rank) {
+                showNewHighScoreAnimation();
+                document.getElementById('highScoreMessage').textContent = `🎉 おめでとう！第${rank}位にランクインしました！`;
+            } else {
+                document.getElementById('highScoreMessage').textContent = '';
+            }
+            
+            displayHighScores();
+        }
+        
+        function showNewHighScoreAnimation() {
+            const newHighScoreText = document.createElement('div');
+            newHighScoreText.className = 'new-high-score';
+            newHighScoreText.textContent = '🎉 NEW HIGH SCORE! 🎉';
+            
+            animationOverlay.appendChild(newHighScoreText);
+            
+            setTimeout(() => {
+                if (newHighScoreText.parentNode) {
+                    newHighScoreText.parentNode.removeChild(newHighScoreText);
+                }
+            }, 3000);
+        }
+        
+        function createPiece() {
+            const pieceTemplate = PIECES[Math.floor(Math.random() * PIECES.length)];
+            const numbers = pieceTemplate.numbers();
+            
+            let numberIndex = 0;
+            return {
+                shape: pieceTemplate.shape.map(row => 
+                    row.map(cell => cell ? numbers[numberIndex++] || Math.floor(Math.random() * 9) + 1 : 0)
+                ),
+                x: Math.floor(BOARD_WIDTH / 2) - Math.floor(pieceTemplate.shape[0].length / 2),
+                y: 0
+            };
+        }
+        
+        function initGame() {
+            // ボードの初期化
+            gameState.board = Array(BOARD_HEIGHT).fill().map(() => Array(BOARD_WIDTH).fill(0));
+            gameState.score = 0;
+            gameState.level = 1;
+            gameState.lines = 0;
+            gameState.gameOver = false;
+            gameState.dropTime = 0;
+            gameState.dropInterval = 1000; // 初期落下速度を1000msに固定
+            gameState.chainCount = 0;
+            gameState.animatingBlocks = [];
+            gameState.paused = false;
+            
+            // 最初のピースと次のピースを生成
+            gameState.currentPiece = createPiece();
+            gameState.nextPiece = createPiece();
+            
+            // UI更新
+            updateUI();
+            drawNextPiece();
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('highScoreMessage').textContent = '';
+            document.getElementById('pauseBtn').textContent = '⏸️ ポーズ';
+            document.getElementById('pauseBtnMobile').textContent = '⏸️ ポーズ';
+            
+            // アニメーションオーバーレイをクリア
+            animationOverlay.innerHTML = '';
+            
+            // プレイヤーIDとハイスコア表示
+            displayPlayerId();
+            displayHighScores();
+        }
+        
+        function spawnNewPiece() {
+            // 現在のピースを次のピースに置き換え
+            gameState.currentPiece = gameState.nextPiece;
+            gameState.currentPiece.x = Math.floor(BOARD_WIDTH / 2) - Math.floor(gameState.currentPiece.shape[0].length / 2);
+            gameState.currentPiece.y = 0;
+            
+            // 新しい次のピースを生成
+            gameState.nextPiece = createPiece();
+            
+            // 次のピースを描画
+            drawNextPiece();
+            
+            // ゲームオーバーチェック
+            if (isCollision(gameState.currentPiece)) {
+                gameState.gameOver = true;
+                checkNewHighScore();
+                showGameOver();
+                return;
+            }
+        }
+        
+        function drawNextPiece() {
+            // 次のピース表示エリアをクリア
+            nextCtx.fillStyle = '#F8F9FA';
+            nextCtx.fillRect(0, 0, nextPieceCanvas.width, nextPieceCanvas.height);
+            
+            if (!gameState.nextPiece) return;
+            
+            const piece = gameState.nextPiece;
+            const pieceWidth = piece.shape[0].length;
+            const pieceHeight = piece.shape.length;
+            
+            // 中央に配置するためのオフセット計算
+            const offsetX = (nextPieceCanvas.width - pieceWidth * NEXT_BLOCK_SIZE) / 2;
+            const offsetY = (nextPieceCanvas.height - pieceHeight * NEXT_BLOCK_SIZE) / 2;
+            
+            for (let y = 0; y < piece.shape.length; y++) {
+                for (let x = 0; x < piece.shape[y].length; x++) {
+                    if (piece.shape[y][x] !== 0) {
+                        drawNextBlock(
+                            offsetX + x * NEXT_BLOCK_SIZE,
+                            offsetY + y * NEXT_BLOCK_SIZE,
+                            piece.shape[y][x]
+                        );
+                    }
+                }
+            }
+        }
+        
+        function drawNextBlock(x, y, number) {
+            // 小学生向けの明るい色
+            const colors = [
+                '#FF6B6B', '#4ECDC4', '#45B7B8', '#FFE135', '#FFA726',
+                '#66BB6A', '#AB47BC', '#FF7043', '#26A69A'
+            ];
+            
+            const baseColor = colors[number - 1];
+            
+            // グラデーション効果
+            const gradient = nextCtx.createLinearGradient(x, y, x + NEXT_BLOCK_SIZE, y + NEXT_BLOCK_SIZE);
+            gradient.addColorStop(0, baseColor);
+            gradient.addColorStop(1, darkenColor(baseColor));
+            
+            nextCtx.fillStyle = gradient;
+            nextCtx.fillRect(x, y, NEXT_BLOCK_SIZE, NEXT_BLOCK_SIZE);
+            
+            // 境界線
+            nextCtx.strokeStyle = '#E0E0E0';
+            nextCtx.lineWidth = 2;
+            nextCtx.strokeRect(x, y, NEXT_BLOCK_SIZE, NEXT_BLOCK_SIZE);
+            
+            // 数字を描画
+            nextCtx.fillStyle = '#FFFFFF';
+            nextCtx.font = 'bold 14px Arial';
+            nextCtx.textAlign = 'center';
+            nextCtx.textBaseline = 'middle';
+            nextCtx.strokeStyle = '#2C3E50';
+            nextCtx.lineWidth = 0.5;
+            nextCtx.strokeText(
+                number.toString(),
+                x + NEXT_BLOCK_SIZE / 2,
+                y + NEXT_BLOCK_SIZE / 2
+            );
+            nextCtx.fillText(
+                number.toString(),
+                x + NEXT_BLOCK_SIZE / 2,
+                y + NEXT_BLOCK_SIZE / 2
+            );
+        }
+        
+        function isCollision(piece, dx = 0, dy = 0) {
+            for (let y = 0; y < piece.shape.length; y++) {
+                for (let x = 0; x < piece.shape[y].length; x++) {
+                    if (piece.shape[y][x] !== 0) {
+                        const newX = piece.x + x + dx;
+                        const newY = piece.y + y + dy;
+                        
+                        if (newX < 0 || newX >= BOARD_WIDTH || newY >= BOARD_HEIGHT) {
+                            return true;
+                        }
+                        
+                        if (newY >= 0 && gameState.board[newY][newX] !== 0) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+        
+        function placePiece() {
+            const piece = gameState.currentPiece;
+            for (let y = 0; y < piece.shape.length; y++) {
+                for (let x = 0; x < piece.shape[y].length; x++) {
+                    if (piece.shape[y][x] !== 0) {
+                        const boardY = piece.y + y;
+                        const boardX = piece.x + x;
+                        if (boardY >= 0) {
+                            gameState.board[boardY][boardX] = piece.shape[y][x];
+                        }
+                    }
+                }
+            }
+            
+            // チェーンをリセット
+            gameState.chainCount = 0;
+            
+            // 消去処理
+            setTimeout(() => {
+                processChain();
+            }, 100);
+            
+            spawnNewPiece();
+        }
+        
+        function processChain() {
+            const toRemove = findBlocksToRemove();
+            
+            if (toRemove.length === 0) {
+                return;
+            }
+            
+            // チェーンカウント増加
+            gameState.chainCount++;
+            
+            // 消去アニメーション
+            createRemovalAnimation(toRemove);
+            
+            // ブロックを消去
+            setTimeout(() => {
+                toRemove.forEach(([y, x]) => {
+                    gameState.board[y][x] = 0;
+                });
+                
+                // スコア計算（チェーンボーナス付き）
+                const baseScore = toRemove.length * 100;
+                const chainBonus = gameState.chainCount > 1 ? (gameState.chainCount - 1) * 200 : 0;
+                const oldScore = gameState.score;
+                gameState.score += baseScore + chainBonus;
+                
+                // スコアアニメーション
+                animateScoreChange();
+                
+                // チェーンテキスト表示
+                if (gameState.chainCount > 1) {
+                    showChainText(gameState.chainCount);
+                }
+                
+                // ブロックを落下
+                dropBlocks();
+                
+                // レベルアップチェック
+                const oldLevel = gameState.level;
+                gameState.lines += Math.floor(toRemove.length / 2);
+                if (gameState.lines >= gameState.level * 10) {
+                    gameState.level++;
+                    gameState.dropInterval = Math.max(100, 1000 - (gameState.level - 1) * 100);
+                    
+                    // レベルアップアニメーション
+                    if (gameState.level > oldLevel) {
+                        showLevelUpAnimation();
+                    }
+                }
+                
+                updateUI();
+                
+                // 次のチェーンをチェック
+                setTimeout(() => {
+                    processChain();
+                }, 300);
+            }, 500);
+        }
+        
+        function createRemovalAnimation(toRemove) {
+            toRemove.forEach(([y, x]) => {
+                const pixelX = x * BLOCK_SIZE;
+                const pixelY = y * BLOCK_SIZE;
+                
+                // パーティクル効果
+                for (let i = 0; i < 10; i++) {
+                    createParticle(pixelX + BLOCK_SIZE / 2, pixelY + BLOCK_SIZE / 2);
+                }
+                
+                // ブロックを点滅させる
+                gameState.animatingBlocks.push({
+                    x: x,
+                    y: y,
+                    startTime: Date.now(),
+                    duration: 500
+                });
+            });
+        }
+        
+        function createParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            
+            // 明るい色のパーティクル
+            const colors = ['#FFE135', '#FF6B6B', '#4ECDC4', '#45B7B8', '#FFA726', '#66BB6A'];
+            particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = 60 + Math.random() * 60;
+            const vx = Math.cos(angle) * velocity;
+            const vy = Math.sin(angle) * velocity;
+            
+            particle.style.animation = `particleExplode 1s ease-out forwards`;
+            particle.style.transform = `translate(${vx}px, ${vy}px)`;
+            
+            animationOverlay.appendChild(particle);
+            
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, 1000);
+        }
+        
+        function showChainText(chainCount) {
+            const chainText = document.createElement('div');
+            chainText.className = 'chain-text';
+            chainText.textContent = `🎉 ${chainCount} CHAIN! 🎉`;
+            chainText.style.left = Math.random() * 200 + 50 + 'px';
+            chainText.style.top = Math.random() * 200 + 100 + 'px';
+            
+            animationOverlay.appendChild(chainText);
+            
+            setTimeout(() => {
+                if (chainText.parentNode) {
+                    chainText.parentNode.removeChild(chainText);
+                }
+            }, 1000);
+        }
+        
+        function showLevelUpAnimation() {
+            const levelUpText = document.createElement('div');
+            levelUpText.className = 'level-up-text';
+            levelUpText.textContent = '🌟 LEVEL UP! 🌟';
+            
+            animationOverlay.appendChild(levelUpText);
+            
+            // 画面を一瞬光らせる
+            document.body.style.background = 'linear-gradient(135deg, #FFE135 0%, #4ECDC4 100%)';
+            setTimeout(() => {
+                document.body.style.background = 'linear-gradient(135deg, #FFE135 0%, #FF6B6B 50%, #4ECDC4 100%)';
+            }, 300);
+            
+            setTimeout(() => {
+                if (levelUpText.parentNode) {
+                    levelUpText.parentNode.removeChild(levelUpText);
+                }
+            }, 2000);
+        }
+        
+        function animateScoreChange() {
+            const scoreElement = document.getElementById('score').parentElement;
+            const scoreMobileElement = document.getElementById('scoreMobile').parentElement;
+            
+            scoreElement.classList.remove('score-glow');
+            scoreMobileElement.classList.remove('score-glow');
+            
+            setTimeout(() => {
+                scoreElement.classList.add('score-glow');
+                scoreMobileElement.classList.add('score-glow');
+            }, 10);
+            
+            setTimeout(() => {
+                scoreElement.classList.remove('score-glow');
+                scoreMobileElement.classList.remove('score-glow');
+            }, 500);
+        }
+        
+        function findBlocksToRemove() {
+            const toRemove = new Set();
+            
+            for (let y = 0; y < BOARD_HEIGHT; y++) {
+                for (let x = 0; x < BOARD_WIDTH; x++) {
+                    if (gameState.board[y][x] !== 0) {
+                        const currentNum = gameState.board[y][x];
+                        
+                        // 上下左右をチェック
+                        const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+                        
+                        for (let [dy, dx] of directions) {
+                            const ny = y + dy;
+                            const nx = x + dx;
+                            
+                            if (ny >= 0 && ny < BOARD_HEIGHT && nx >= 0 && nx < BOARD_WIDTH) {
+                                const neighborNum = gameState.board[ny][nx];
+                                
+                                if (neighborNum !== 0 && currentNum + neighborNum === 10) {
+                                    toRemove.add(`${y},${x}`);
+                                    toRemove.add(`${ny},${nx}`);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return Array.from(toRemove).map(pos => pos.split(',').map(Number));
+        }
+        
+        function dropBlocks() {
+            for (let x = 0; x < BOARD_WIDTH; x++) {
+                let writePos = BOARD_HEIGHT - 1;
+                
+                for (let y = BOARD_HEIGHT - 1; y >= 0; y--) {
+                    if (gameState.board[y][x] !== 0) {
+                        if (y !== writePos) {
+                            gameState.board[writePos][x] = gameState.board[y][x];
+                            gameState.board[y][x] = 0;
+                        }
+                        writePos--;
+                    }
+                }
+            }
+        }
+        
+        function rotatePiece(piece) {
+            const rotated = piece.shape[0].map((_, index) =>
+                piece.shape.map(row => row[index]).reverse()
+            );
+            
+            return {
+                ...piece,
+                shape: rotated
+            };
+        }
+        
+        function draw() {
+            // 背景をクリア
+            ctx.fillStyle = '#F8F9FA';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // ポーズ中の表示
+            if (gameState.paused) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 36px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('⏸️ PAUSE', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+            
+            // ボードを描画
+            for (let y = 0; y < BOARD_HEIGHT; y++) {
+                for (let x = 0; x < BOARD_WIDTH; x++) {
+                    if (gameState.board[y][x] !== 0) {
+                        // アニメーション中のブロックをチェック
+                        const animatingBlock = gameState.animatingBlocks.find(block => 
+                            block.x === x && block.y === y
+                        );
+                        
+                        if (animatingBlock) {
+                            const elapsed = Date.now() - animatingBlock.startTime;
+                            const progress = elapsed / animatingBlock.duration;
+                            
+                            if (progress < 1) {
+                                // 点滅効果
+                                const alpha = Math.sin(progress * Math.PI * 10) * 0.5 + 0.5;
+                                drawBlock(x, y, gameState.board[y][x], false, alpha);
+                            } else {
+                                // アニメーション終了
+                                gameState.animatingBlocks = gameState.animatingBlocks.filter(block => 
+                                    !(block.x === x && block.y === y)
+                                );
+                            }
+                        } else {
+                            drawBlock(x, y, gameState.board[y][x]);
+                        }
+                    }
+                }
+            }
+            
+            // 現在のピースを描画
+            if (gameState.currentPiece && !gameState.gameOver) {
+                const piece = gameState.currentPiece;
+                for (let y = 0; y < piece.shape.length; y++) {
+                    for (let x = 0; x < piece.shape[y].length; x++) {
+                        if (piece.shape[y][x] !== 0) {
+                            drawBlock(piece.x + x, piece.y + y, piece.shape[y][x], true);
+                        }
+                    }
+                }
+            }
+            
+            // グリッドを描画
+            drawGrid();
+        }
+        
+        function drawBlock(x, y, number, isActive = false, alpha = 1) {
+            const pixelX = x * BLOCK_SIZE;
+            const pixelY = y * BLOCK_SIZE;
+            
+            // 小学生向けの明るい色
+            const colors = [
+                '#FF6B6B', '#4ECDC4', '#45B7B8', '#FFE135', '#FFA726',
+                '#66BB6A', '#AB47BC', '#FF7043', '#26A69A'
+            ];
+            
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            
+            // グラデーション効果
+            const gradient = ctx.createLinearGradient(pixelX, pixelY, pixelX + BLOCK_SIZE, pixelY + BLOCK_SIZE);
+            const baseColor = colors[number - 1];
+            gradient.addColorStop(0, baseColor);
+            gradient.addColorStop(1, darkenColor(baseColor));
+            
+            ctx.fillStyle = isActive ? baseColor : gradient;
+            ctx.fillRect(pixelX, pixelY, BLOCK_SIZE, BLOCK_SIZE);
+            
+            // 明るい境界線
+            ctx.strokeStyle = isActive ? '#FFFFFF' : '#E0E0E0';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(pixelX, pixelY, BLOCK_SIZE, BLOCK_SIZE);
+            
+            // 数字を描画
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.strokeStyle = '#2C3E50';
+            ctx.lineWidth = 1;
+            ctx.strokeText(
+                number.toString(),
+                pixelX + BLOCK_SIZE / 2,
+                pixelY + BLOCK_SIZE / 2
+            );
+            ctx.fillText(
+                number.toString(),
+                pixelX + BLOCK_SIZE / 2,
+                pixelY + BLOCK_SIZE / 2
+            );
+            
+            ctx.restore();
+        }
+        
+        function darkenColor(color) {
+            const hex = color.replace('#', '');
+            const r = parseInt(hex.substr(0, 2), 16);
+            const g = parseInt(hex.substr(2, 2), 16);
+            const b = parseInt(hex.substr(4, 2), 16);
+            
+            return `rgb(${Math.floor(r * 0.8)}, ${Math.floor(g * 0.8)}, ${Math.floor(b * 0.8)})`;
+        }
+        
+               function drawGrid() {
+            ctx.strokeStyle = '#E0E0E0';
+            ctx.lineWidth = 1;
+            
+            for (let x = 0; x <= BOARD_WIDTH; x++) {
+                ctx.beginPath();
+                ctx.moveTo(x * BLOCK_SIZE, 0);
+                ctx.lineTo(x * BLOCK_SIZE, canvas.height);
+                ctx.stroke();
+            }
+            
+            for (let y = 0; y <= BOARD_HEIGHT; y++) {
+                ctx.beginPath();
+                ctx.moveTo(0, y * BLOCK_SIZE);
+                ctx.lineTo(canvas.width, y * BLOCK_SIZE);
+                ctx.stroke();
+            }
+        }
+        
+        function updateUI() {
+            document.getElementById('score').textContent = gameState.score.toLocaleString();
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('lines').textContent = gameState.lines;
+            
+            // スマホ版のUI更新
+            document.getElementById('scoreMobile').textContent = gameState.score.toLocaleString();
+            document.getElementById('levelMobile').textContent = gameState.level;
+            document.getElementById('linesMobile').textContent = gameState.lines;
+        }
+        
+        function showGameOver() {
+            document.getElementById('finalScore').textContent = gameState.score.toLocaleString();
+            document.getElementById('gameOver').style.display = 'block';
+        }
+        
+        function restartGame() {
+            document.getElementById('gameOver').style.display = 'none';
+            initGame();
+        }
+        
+        // キーボードイベント
+        document.addEventListener('keydown', (e) => {
+            if (!gameState.gameStarted || gameState.gameOver || gameState.paused || !gameState.currentPiece) return;
+            
+            switch (e.key.toLowerCase()) {
+                case 'arrowleft':
+                case 'z':
+                    if (!isCollision(gameState.currentPiece, -1, 0)) {
+                        gameState.currentPiece.x--;
+                    }
+                    break;
+                case 'arrowright':
+                case 'c':
+                    if (!isCollision(gameState.currentPiece, 1, 0)) {
+                        gameState.currentPiece.x++;
+                    }
+                    break;
+                case 'arrowdown':
+                case 'x':
+                    if (!isCollision(gameState.currentPiece, 0, 1)) {
+                        gameState.currentPiece.y++;
+                    }
+                    break;
+                case 'arrowup':
+                case ' ':
+                case 'enter':
+                    const rotated = rotatePiece(gameState.currentPiece);
+                    if (!isCollision(rotated)) {
+                        gameState.currentPiece = rotated;
+                    }
+                    e.preventDefault();
+                    break;
+                case 'p':
+                    togglePause();
+                    break;
+            }
+        });
+        
+        // ゲームループ
+        function gameLoop(timestamp) {
+            if (!gameState.gameStarted) {
+                return;
+            }
+            
+            if (!gameState.gameOver && !gameState.paused) {
+                // 自動落下
+                if (timestamp - gameState.dropTime > gameState.dropInterval) {
+                    if (gameState.currentPiece) {
+                        if (!isCollision(gameState.currentPiece, 0, 1)) {
+                            gameState.currentPiece.y++;
+                        } else {
+                            placePiece();
+                        }
+                    }
+                    gameState.dropTime = timestamp;
+                }
+            }
+            
+            draw();
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+        
+        // 初期化
+        displayPlayerId();
+        displayHighScores();
+    </script>
+</body>
+</html>
