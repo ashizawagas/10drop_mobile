@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>１０dropモバイル</title>
+    <title>数字Dropモバイル</title>
     <style>
         body {
             margin: 0;
@@ -36,6 +36,7 @@
             align-items: center;
             z-index: 2000;
             overflow: hidden;
+            padding: 10px;
         }
         
         .start-screen h1 {
@@ -44,6 +45,7 @@
             text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
             margin-bottom: 20px;
             animation: titleBounce 2s ease-in-out infinite;
+            text-align: center;
         }
         
         .start-screen p {
@@ -52,6 +54,7 @@
             text-align: center;
             margin: 20px 0;
             line-height: 1.6;
+            max-width: 90%;
         }
         
         .start-btn {
@@ -91,6 +94,7 @@
             max-width: 400px;
             overflow: hidden;
             position: relative;
+            padding: 5px;
         }
         
         .score-bar {
@@ -146,7 +150,7 @@
             align-items: center;
             position: relative;
             margin: 0 5px 5px 5px;
-            overflow: hidden;
+            min-height: 0;
         }
         
         .game-board {
@@ -161,6 +165,8 @@
             align-items: center;
             width: 100%;
             height: 100%;
+            max-width: 380px;
+            max-height: 650px;
         }
         
         canvas {
@@ -170,6 +176,7 @@
             border: 3px solid #4ECDC4;
             max-width: 100%;
             max-height: 100%;
+            object-fit: contain;
         }
         
         .next-piece-panel {
@@ -178,7 +185,7 @@
             right: 15px;
             background: rgba(255, 255, 255, 0.95);
             border-radius: 10px;
-            padding: 9px;
+            padding: 8px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             border: 2px solid #FFE135;
             text-align: center;
@@ -186,7 +193,7 @@
         }
         
         .next-piece-panel h3 {
-            margin: 0 0 7px 0;
+            margin: 0 0 5px 0;
             font-size: 10px;
             color: #FF6B6B;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
@@ -213,6 +220,8 @@
             z-index: 1000;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
         }
         
         .restart-btn {
@@ -237,8 +246,8 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            right: 10px;
-            bottom: 10px;
+            width: calc(100% - 20px);
+            height: calc(100% - 20px);
             pointer-events: none;
             z-index: 10;
         }
@@ -396,6 +405,7 @@
             .game-container {
                 max-width: 100%;
                 height: 100vh;
+                padding: 2px;
             }
             
             .score-bar {
@@ -424,11 +434,12 @@
             
             .game-board {
                 padding: 8px;
+                max-height: calc(100vh - 80px);
             }
             
             canvas {
-                width: 100% !important;
-                height: auto !important;
+                width: 100%;
+                height: auto;
                 max-width: 300px;
                 max-height: 480px;
             }
@@ -441,12 +452,19 @@
             
             .next-piece-panel h3 {
                 font-size: 8px;
-                margin: 0 0 4px 0;
+                margin: 0 0 3px 0;
             }
             
             #nextPieceCanvas {
-                width: 75px;
-                height: 75px;
+                width: 50px;
+                height: 50px;
+            }
+            
+            .animation-overlay {
+                width: calc(100% - 16px);
+                height: calc(100% - 16px);
+                top: 8px;
+                left: 8px;
             }
             
             .game-over {
@@ -476,25 +494,85 @@
                 max-height: 450px;
             }
             
+            .animation-overlay {
+                width: calc(100% - 16px);
+                height: calc(100% - 16px);
+            }
+            
             #nextPieceCanvas {
-                width: 68px;
-                height: 68px;
+                width: 45px;
+                height: 45px;
+            }
+        }
+        
+        /* 縦向き画面での調整 */
+        @media (orientation: portrait) and (max-height: 600px) {
+            .game-container {
+                height: 100vh;
+            }
+            
+            .game-board {
+                max-height: calc(100vh - 70px);
+            }
+            
+            canvas {
+                max-height: calc(100vh - 120px);
+            }
+        }
+        
+        /* 横向き画面での調整 */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .start-screen h1 {
+                font-size: 20px;
+                margin-bottom: 10px;
+            }
+            
+            .start-screen p {
+                font-size: 10px;
+                margin: 10px 0;
+            }
+            
+            .start-btn {
+                font-size: 14px;
+                padding: 10px 20px;
+                margin: 10px;
+            }
+            
+            .score-bar {
+                height: 35px;
+                padding: 4px 8px;
+            }
+            
+            .score-item {
+                font-size: 9px;
+            }
+            
+            .score-value {
+                font-size: 11px;
+            }
+            
+            .game-board {
+                max-height: calc(100vh - 50px);
+            }
+            
+            canvas {
+                max-height: calc(100vh - 90px);
             }
         }
     </style>
 </head>
 <body>
     <div id="startScreen" class="start-screen">
-        <h1>🎮 １０dropモバイル 🎮</h1>
+        <h1>🎮 数字Dropモバイル 🎮</h1>
         <p>
             🎯 隣接する数字の合計が10になると消える！<br>
-            🌟 連鎖でボーナス点を獲得しよう！<br>
+            🔥 連鎖でボーナス点を獲得しよう！<br>
             🏆 高得点を目指してがんばって！
         </p>
         <p>
             <strong>🎮 操作方法:</strong><br>
-            PC: ← / Z : 左移動　　→ / C : 右移動<br>
-            PC: ↓ / X : 高速落下　　↑ / Space / Enter : 回転<br>
+            PC: ← / Z : 左移動、→ / C : 右移動<br>
+            PC: ↓ / X : 高速落下、↑ / Space / Enter : 回転<br>
             スマホ: 左右スワイプで移動、下フリックで高速落下、上フリックで回転
         </p>
         <button class="start-btn" onclick="startGame()">🚀 ゲームスタート 🚀</button>
@@ -521,13 +599,13 @@
         <!-- ゲーム画面 -->
         <div class="game-area">
             <div class="game-board">
-                <canvas id="gameCanvas" width="336" height="560"></canvas>
+                <canvas id="gameCanvas" width="342" height="600"></canvas>
                 <div class="animation-overlay" id="animationOverlay"></div>
                 
-                <!-- 次のブロック表示（右上） -->
+                <!-- 次のブロック表示（右上の小さいサイズ） -->
                 <div class="next-piece-panel">
                     <h3>🎯 次</h3>
-                    <canvas id="nextPieceCanvas" width="90" height="90"></canvas>
+                    <canvas id="nextPieceCanvas" width="96" height="101"></canvas>
                 </div>
             </div>
         </div>
@@ -550,7 +628,7 @@
         const BLOCK_SIZE = 28;
         const BOARD_WIDTH = 12;
         const BOARD_HEIGHT = 20;
-        const NEXT_BLOCK_SIZE = 18; // 1.5倍に変更（12 * 1.5 = 18）
+        const NEXT_BLOCK_SIZE = 18.6;
         
         let gameState = {
             board: [],
@@ -577,7 +655,7 @@
         let touchEndY = 0;
         const minSwipeDistance = 50;
         
-        // 各文字のブロック配置パターン（左上を(0,0)とする座標系）
+        // 各数字のブロック配置パターン（左上を(0,0)とする座標系）
         const blockPatterns = {
             '1': [
                 [0, 0], [0, 1], [0, 2], [0, 3], [0, 4]
@@ -607,11 +685,11 @@
                 [0, 0], [1, 0], [2, 0],
                 [2, 1], [2, 2], [2, 3]
             ],
-            '「': [
+            'L': [
                 [0, 0], [1, 0],
                 [0, 1]
             ],
-            '」': [
+            'J': [
                 [1, 0],
                 [0, 1], [1, 1]
             ]
@@ -663,17 +741,45 @@
                 shape: createShapeFromPattern(blockPatterns['7']),
                 numbers: () => Array(blockPatterns['7'].length).fill().map(() => Math.floor(Math.random() * 9) + 1)
             },
-            // 「の形
+            // Lの形
             {
-                shape: createShapeFromPattern(blockPatterns['「']),
-                numbers: () => Array(blockPatterns['「'].length).fill().map(() => Math.floor(Math.random() * 9) + 1)
+                shape: createShapeFromPattern(blockPatterns['L']),
+                numbers: () => Array(blockPatterns['L'].length).fill().map(() => Math.floor(Math.random() * 9) + 1)
             },
-            // 」の形
+            // Jの形
             {
-                shape: createShapeFromPattern(blockPatterns['」']),
-                numbers: () => Array(blockPatterns['」'].length).fill().map(() => Math.floor(Math.random() * 9) + 1)
+                shape: createShapeFromPattern(blockPatterns['J']),
+                numbers: () => Array(blockPatterns['J'].length).fill().map(() => Math.floor(Math.random() * 9) + 1)
             }
         ];
+        
+        // 画面サイズに応じてキャンバスサイズを調整
+        function adjustCanvasSize() {
+            const gameBoard = document.querySelector('.game-board');
+            const maxWidth = Math.min(gameBoard.clientWidth - 20, 342);
+            const maxHeight = Math.min(gameBoard.clientHeight - 20, 600);
+            
+            // アスペクト比を維持
+            const aspectRatio = 342 / 600;
+            let newWidth, newHeight;
+            
+            if (maxWidth / maxHeight > aspectRatio) {
+                newHeight = maxHeight;
+                newWidth = maxHeight * aspectRatio;
+            } else {
+                newWidth = maxWidth;
+                newHeight = maxWidth / aspectRatio;
+            }
+            
+            canvas.style.width = newWidth + 'px';
+            canvas.style.height = newHeight + 'px';
+        }
+        
+        // ウィンドウリサイズ時の処理
+        window.addEventListener('resize', adjustCanvasSize);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(adjustCanvasSize, 100);
+        });
         
         // タッチイベントの設定
         function setupTouchEvents() {
@@ -747,6 +853,7 @@
             gameState.gameStarted = true;
             initGame();
             setupTouchEvents(); // タッチイベントを設定
+            adjustCanvasSize(); // キャンバスサイズを調整
             if (gameLoopId) {
                 cancelAnimationFrame(gameLoopId);
             }
@@ -765,7 +872,7 @@
             }
         }
         
-        // ポーズ機能
+        // ポーズ切替
         function togglePause() {
             if (!gameState.gameStarted || gameState.gameOver) return;
             
@@ -846,7 +953,7 @@
             
             if (rank) {
                 showNewHighScoreAnimation();
-                document.getElementById('highScoreMessage').textContent = `🎉 おめでとう！第${rank}位にランクインしました！`;
+                document.getElementById('highScoreMessage').textContent = `🎊 おめでとう！第${rank}位にランクインしました！`;
             } else {
                 document.getElementById('highScoreMessage').textContent = '';
             }
@@ -855,7 +962,7 @@
         function showNewHighScoreAnimation() {
             const newHighScoreText = document.createElement('div');
             newHighScoreText.className = 'new-high-score';
-            newHighScoreText.textContent = '🎉 NEW HIGH SCORE! 🎉';
+            newHighScoreText.textContent = '🎊 NEW HIGH SCORE! 🎊';
             
             animationOverlay.appendChild(newHighScoreText);
             
@@ -961,7 +1068,7 @@
         }
         
         function drawNextBlock(x, y, number) {
-            // 小学生向けの明るい色
+            // 各数字毎に色を変える
             const colors = [
                 '#FF6B6B', '#4ECDC4', '#45B7B8', '#FFE135', '#FFA726',
                 '#66BB6A', '#AB47BC', '#FF7043', '#26A69A'
@@ -982,9 +1089,9 @@
             nextCtx.lineWidth = 1;
             nextCtx.strokeRect(x, y, NEXT_BLOCK_SIZE, NEXT_BLOCK_SIZE);
             
-            // 数字を描画（フォントサイズを1.5倍に調整）
+            // 数字を描画
             nextCtx.fillStyle = '#FFFFFF';
-            nextCtx.font = 'bold 14px Arial'; // 9px * 1.5 ≈ 14px
+            nextCtx.font = 'bold 13.5px Arial';
             nextCtx.textAlign = 'center';
             nextCtx.textBaseline = 'middle';
             nextCtx.strokeStyle = '#2C3E50';
@@ -1130,7 +1237,7 @@
             particle.style.left = x + 'px';
             particle.style.top = y + 'px';
             
-            // 明るい色のパーティクル
+            // 色とりどりのパーティクル
             const colors = ['#FFE135', '#FF6B6B', '#4ECDC4', '#45B7B8', '#FFA726', '#66BB6A'];
             particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
             
@@ -1154,7 +1261,7 @@
         function showChainText(chainCount) {
             const chainText = document.createElement('div');
             chainText.className = 'chain-text';
-            chainText.textContent = `🎉 ${chainCount} CHAIN! 🎉`;
+            chainText.textContent = `🎊 ${chainCount} CHAIN! 🎊`;
             chainText.style.left = Math.random() * 150 + 50 + 'px';
             chainText.style.top = Math.random() * 150 + 100 + 'px';
             
@@ -1170,7 +1277,7 @@
         function showLevelUpAnimation() {
             const levelUpText = document.createElement('div');
             levelUpText.className = 'level-up-text';
-            levelUpText.textContent = '🌟 LEVEL UP! 🌟';
+            levelUpText.textContent = '🔥 LEVEL UP! 🔥';
             
             animationOverlay.appendChild(levelUpText);
             
@@ -1327,7 +1434,7 @@
             const pixelX = x * BLOCK_SIZE;
             const pixelY = y * BLOCK_SIZE;
             
-            // 小学生向けの明るい色
+            // 各数字毎に色を変える
             const colors = [
                 '#FF6B6B', '#4ECDC4', '#45B7B8', '#FFE135', '#FFA726',
                 '#66BB6A', '#AB47BC', '#FF7043', '#26A69A'
@@ -1345,7 +1452,7 @@
             ctx.fillStyle = isActive ? baseColor : gradient;
             ctx.fillRect(pixelX, pixelY, BLOCK_SIZE, BLOCK_SIZE);
             
-            // 明るい境界線
+            // 色とりどりの境界線
             ctx.strokeStyle = isActive ? '#FFFFFF' : '#E0E0E0';
             ctx.lineWidth = 2;
             ctx.strokeRect(pixelX, pixelY, BLOCK_SIZE, BLOCK_SIZE);
