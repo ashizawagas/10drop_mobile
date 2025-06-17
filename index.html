@@ -181,11 +181,11 @@
         
         .next-piece-panel {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 20px;
+            right: 20px;
             background: rgba(255, 255, 255, 0.95);
-            border-radius: 10px;
-            padding: 8px;
+            border-radius: 11px;
+            padding: 8.8px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             border: 2px solid #FFE135;
             text-align: center;
@@ -193,8 +193,8 @@
         }
         
         .next-piece-panel h3 {
-            margin: 0 0 5px 0;
-            font-size: 10px;
+            margin: 0 0 5.5px 0;
+            font-size: 11px;
             color: #FF6B6B;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
         }
@@ -202,7 +202,7 @@
         #nextPieceCanvas {
             background: #F8F9FA;
             border: 2px solid #4ECDC4;
-            border-radius: 8px;
+            border-radius: 8.8px;
         }
         
         .game-over {
@@ -445,19 +445,19 @@
             }
             
             .next-piece-panel {
-                top: 10px;
-                right: 10px;
-                padding: 6px;
+                top: 15px;
+                right: 15px;
+                padding: 6.6px;
             }
             
             .next-piece-panel h3 {
-                font-size: 8px;
-                margin: 0 0 3px 0;
+                font-size: 8.8px;
+                margin: 0 0 3.3px 0;
             }
             
             #nextPieceCanvas {
-                width: 50px;
-                height: 50px;
+                width: 55px;
+                height: 55px;
             }
             
             .animation-overlay {
@@ -500,8 +500,8 @@
             }
             
             #nextPieceCanvas {
-                width: 45px;
-                height: 45px;
+                width: 49.5px;
+                height: 49.5px;
             }
         }
         
@@ -605,7 +605,7 @@
                 <!-- 次のブロック表示（右上の小さいサイズ） -->
                 <div class="next-piece-panel">
                     <h3>🎯 次</h3>
-                    <canvas id="nextPieceCanvas" width="96" height="101"></canvas>
+                    <canvas id="nextPieceCanvas" width="105.6" height="111.1"></canvas>
                 </div>
             </div>
         </div>
@@ -628,7 +628,7 @@
         const BLOCK_SIZE = 28;
         const BOARD_WIDTH = 12;
         const BOARD_HEIGHT = 20;
-        const NEXT_BLOCK_SIZE = 18.6;
+        const NEXT_BLOCK_SIZE = 20.46;
         
         let gameState = {
             board: [],
@@ -653,7 +653,10 @@
         let touchStartY = 0;
         let touchEndX = 0;
         let touchEndY = 0;
-        const minSwipeDistance = 50;
+        const minSwipeDistance = 30; // フリック感度を下げる
+        let isFlicking = false; // フリック中フラグ
+        let flickStartTime = 0;
+        const maxFlickTime = 200; // 素早いフリックの最大時間（ミリ秒）
         
         // 各数字のブロック配置パターン（左上を(0,0)とする座標系）
         const blockPatterns = {
@@ -794,6 +797,8 @@
             
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
+            flickStartTime = Date.now();
+            isFlicking = false;
         }
         
         function handleTouchMove(e) {
@@ -802,6 +807,46 @@
             
             touchEndX = e.touches[0].clientX;
             touchEndY = e.touches[0].clientY;
+            
+            const diffX = touchEndX - touchStartX;
+            const diffY = touchEndY - touchStartY;
+            const currentTime = Date.now();
+            const flickTime = currentTime - flickStartTime;
+            
+            // 素早い左右フリックの検出と高速移動
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > minSwipeDistance && flickTime < maxFlickTime) {
+                if (!isFlicking) {
+                    isFlicking = true;
+                    
+                    if (diffX > 0) {
+                        // 右方向の高速移動
+                        let moved = false;
+                        while (!isCollision(gameState.currentPiece, 1, 0)) {
+                            gameState.currentPiece.x++;
+                            moved = true;
+                        }
+                        if (moved) {
+                            // 壁まで移動した場合は少し戻す
+                            if (isCollision(gameState.currentPiece, 1, 0)) {
+                                // 既に壁に到達している
+                            }
+                        }
+                    } else {
+                        // 左方向の高速移動
+                        let moved = false;
+                        while (!isCollision(gameState.currentPiece, -1, 0)) {
+                            gameState.currentPiece.x--;
+                            moved = true;
+                        }
+                        if (moved) {
+                            // 壁まで移動した場合は少し戻す
+                            if (isCollision(gameState.currentPiece, -1, 0)) {
+                                // 既に壁に到達している
+                            }
+                        }
+                    }
+                }
+            }
         }
         
         function handleTouchEnd(e) {
@@ -810,18 +855,25 @@
             
             const diffX = touchEndX - touchStartX;
             const diffY = touchEndY - touchStartY;
+            const flickTime = Date.now() - flickStartTime;
             
-            // スワイプ距離が最小距離以上かチェック
+            // 高速フリックが既に処理されている場合は通常の処理をスキップ
+            if (isFlicking) {
+                isFlicking = false;
+                return;
+            }
+            
+            // 通常のスワイプ処理（ゆっくりとしたスワイプ）
             if (Math.abs(diffX) > Math.abs(diffY)) {
                 // 横方向のスワイプ
                 if (Math.abs(diffX) > minSwipeDistance) {
                     if (diffX > 0) {
-                        // 右スワイプ
+                        // 右スワイプ（1マス移動）
                         if (!isCollision(gameState.currentPiece, 1, 0)) {
                             gameState.currentPiece.x++;
                         }
                     } else {
-                        // 左スワイプ
+                        // 左スワイプ（1マス移動）
                         if (!isCollision(gameState.currentPiece, -1, 0)) {
                             gameState.currentPiece.x--;
                         }
@@ -1091,7 +1143,7 @@
             
             // 数字を描画
             nextCtx.fillStyle = '#FFFFFF';
-            nextCtx.font = 'bold 13.5px Arial';
+            nextCtx.font = 'bold 14.85px Arial';
             nextCtx.textAlign = 'center';
             nextCtx.textBaseline = 'middle';
             nextCtx.strokeStyle = '#2C3E50';
@@ -1522,7 +1574,7 @@
             initGame();
         }
         
-        // キーボードイベント
+             // キーボードイベント
         document.addEventListener('keydown', (e) => {
             if (!gameState.gameStarted || gameState.gameOver || gameState.paused || !gameState.currentPiece) return;
             
